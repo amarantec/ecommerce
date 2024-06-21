@@ -13,12 +13,16 @@ var ErrProductTitleEmpty = errors.New("product title is empty")
 var ErrProductDescriptionEmpty = errors.New("product description is empty")
 var ErrImageUrlEmpty = errors.New("image url is empty")
 var ErrProductPriceEmpty = errors.New("product price is empty")
+var ErrProductIdEmpty = errors.New("product id is empty")
 
 type Service struct {
 	Repository repositories.Repository
 }
 
 func (s Service) Create(ctx context.Context, product models.Product) (models.Product, error) {
+	if product.ID == 0 {
+		return models.Product{}, ErrProductIdEmpty
+	}
 	if product.Title == "" {
 		return models.Product{}, ErrProductTitleEmpty
 	}

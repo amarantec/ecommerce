@@ -6,6 +6,7 @@ func SetRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/products", ListProducts)
-	mux.HandleFunc("/", SayHi)
+	mux.HandleFunc("/new-product", InsertProduct)
+	mux.HandleFunc("/product/:id", GetProductByID)
 	return mux
 }

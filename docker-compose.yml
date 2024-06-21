@@ -4,12 +4,21 @@ services:
   db:
     image: postgres:15.2-alpine3.17
     ports:
-      -5432:5432
+      - "5432:5432"
+    volumes:
+      - data:/data/db
+    env_file:
+      - ./env/pq.env
   api:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - ./env/api.env
     depends_on:
       - db
+
+volumes:
+  data:
