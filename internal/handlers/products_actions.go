@@ -52,38 +52,39 @@ func InsertProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	nP, err := service.Create(ctxTimeout, newProduct)
-	if err != nil {
+	if nP, err := service.Create(ctxTimeout, newProduct); err != nil {
 		http.Error(w, "Could not insert this product", http.StatusInternalServerError)
-		return
+	} else if jsonResp, err := json.MarshalIndent(nP, "", " "); err != nil {
+		http.Error(w, "Could not marshal this response", http.StatusBadRequest)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		w.Write(jsonResp)
 	}
-
-	jsonResp, err := json.MarshalIndent(nP, "", " ")
-	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonResp)
 }
 
 func GetProductByID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if id == 0 || err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusNotFound)
+	idStr := r.URL.Path[len("/product/"):]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	product, err := service.FindOneByID(ctxTimeout, id)
+	product, err := service.FindOneByID(ctxTimeout, int64(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if product.ID == 0 {
+		http.Error(w, "Product not found", http.StatusNotFound)
 		return
 	}
 
@@ -92,7 +93,32 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResp)
+}
+
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Path[len("/delete-product/"):]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err = service.Delete(ctxTimeout, int64(id)); err != nil {
+		if err == services.ErrProductNotFound {
+			http.Error(w, "Product not found", http.StatusNotFound)
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
 }

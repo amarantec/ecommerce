@@ -20,9 +20,6 @@ type Service struct {
 }
 
 func (s Service) Create(ctx context.Context, product models.Product) (models.Product, error) {
-	if product.ID == 0 {
-		return models.Product{}, ErrProductIdEmpty
-	}
 	if product.Title == "" {
 		return models.Product{}, ErrProductTitleEmpty
 	}
