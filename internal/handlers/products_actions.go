@@ -8,27 +8,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/amarantec/e-commerce/internal/database"
 	"github.com/amarantec/e-commerce/internal/models"
-	"github.com/amarantec/e-commerce/internal/repositories"
 	"github.com/amarantec/e-commerce/internal/services"
 )
-
-var service services.Service
-
-func Configure() {
-	service = services.Service{
-		Repository: &repositories.RepositoryPostgres{
-			Conn: database.Conn,
-		},
-	}
-}
 
 func ListProducts(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	products, err := service.FindAll(ctxTimeout)
+	products, err := service.FindAllProducts(ctxTimeout)
 	if err != nil {
 		http.Error(w, "Could not search products", http.StatusInternalServerError)
 		return
@@ -56,7 +44,7 @@ func InsertProduct(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if nP, err := service.Create(ctxTimeout, newProduct); err != nil {
+	if nP, err := service.CreateProduct(ctxTimeout, newProduct); err != nil {
 		http.Error(w, "Could not insert this product", http.StatusInternalServerError)
 	} else if jsonResp, err := json.MarshalIndent(nP, "", " "); err != nil {
 		http.Error(w, "Could not marshal this response", http.StatusBadRequest)
@@ -78,14 +66,9 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	product, err := service.FindOneByID(ctxTimeout, int64(id))
+	product, err := service.FindProductByID(ctxTimeout, int64(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if product.ID == 0 {
-		http.Error(w, "Product not found", http.StatusNotFound)
 		return
 	}
 
@@ -111,7 +94,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err = service.Delete(ctxTimeout, int64(id)); err != nil {
+	if err = service.DeleteProduct(ctxTimeout, int64(id)); err != nil {
 		if err == services.ErrProductNotFound {
 			http.Error(w, "Product not found", http.StatusNotFound)
 		}
@@ -124,7 +107,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func Update(w http.ResponseWriter, r *http.Request) {
+func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/update-product/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -132,18 +115,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var product models.Product
+	var uProduct models.Product
 
-	err = json.NewDecoder(r.Body).Decode(&product)
+	err = json.NewDecoder(r.Body).Decode(&uProduct)
 	if err != nil {
-		http.Error(w, "Could not parse json", http.StatusInternalServerError)
+		http.Error(w, "Could not parse this request", http.StatusBadRequest)
 		return
 	}
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := service.Update(ctxTimeout, product, int64(id)); err != nil {
+	if err := service.UpdateProduct(ctxTimeout, uProduct, int64(id)); err != nil {
 		http.Error(w, "Could not update this product", http.StatusInternalServerError)
 		return
 	}

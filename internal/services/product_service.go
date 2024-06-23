@@ -2,24 +2,11 @@ package services
 
 import (
 	"context"
-	"errors"
 
 	"github.com/amarantec/e-commerce/internal/models"
-	"github.com/amarantec/e-commerce/internal/repositories"
 )
 
-var ErrProductNotFound = errors.New("prodcut not found")
-var ErrProductTitleEmpty = errors.New("product title is empty")
-var ErrProductDescriptionEmpty = errors.New("product description is empty")
-var ErrImageUrlEmpty = errors.New("image url is empty")
-var ErrProductPriceEmpty = errors.New("product price is empty")
-var ErrProductIdEmpty = errors.New("product id is empty")
-
-type Service struct {
-	Repository repositories.Repository
-}
-
-func (s Service) Create(ctx context.Context, product models.Product) (models.Product, error) {
+func (s Service) CreateProduct(ctx context.Context, product models.Product) (models.Product, error) {
 	if product.Title == "" {
 		return models.Product{}, ErrProductTitleEmpty
 	}
@@ -33,19 +20,19 @@ func (s Service) Create(ctx context.Context, product models.Product) (models.Pro
 		return models.Product{}, ErrProductPriceEmpty
 	}
 
-	return s.Repository.Insert(ctx, product)
+	return s.Repository.InsertProduct(ctx, product)
 }
 
-func (s Service) Delete(ctx context.Context, id int64) error {
-	return s.Repository.Delete(ctx, id)
+func (s Service) DeleteProduct(ctx context.Context, id int64) error {
+	return s.Repository.DeleteProduct(ctx, id)
 }
 
-func (s Service) FindOneByID(ctx context.Context, id int64) (models.Product, error) {
-	return s.Repository.FindOneByID(ctx, id)
+func (s Service) FindProductByID(ctx context.Context, id int64) (models.Product, error) {
+	return s.Repository.FindProductByID(ctx, id)
 }
 
-func (s Service) FindAll(ctx context.Context) ([]models.Product, error) {
-	products, err := s.Repository.FindAll(ctx)
+func (s Service) FindAllProducts(ctx context.Context) ([]models.Product, error) {
+	products, err := s.Repository.FindAllProducts(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +40,8 @@ func (s Service) FindAll(ctx context.Context) ([]models.Product, error) {
 	return products, nil
 }
 
-func (s Service) Update(ctx context.Context, product models.Product, id int64) error {
-	err := s.Repository.Update(ctx, product, id)
+func (s Service) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
+	err := s.Repository.UpdateProduct(ctx, product, id)
 	if err != nil {
 		return err
 	}

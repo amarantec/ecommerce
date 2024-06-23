@@ -9,6 +9,12 @@ func SetRoutes() *http.ServeMux {
 	mux.HandleFunc("/new-product", InsertProduct)
 	mux.HandleFunc("/product/{id}", GetProductByID)
 	mux.HandleFunc("/delete-product/{id}", DeleteProduct)
-	mux.HandleFunc("/update-product/{id}", Update)
+	mux.HandleFunc("/update-product/{id}", UpdateProduct)
+
+	mux.HandleFunc("/categories", ListCategories)
+	mux.HandleFunc("/new-category", InsertCategory)
+	mux.HandleFunc("/category/{id}", GetCategoryById)
+	mux.HandleFunc("/delete-category/{id}", DeleteCategory)
+	mux.HandleFunc("/update-category/{id}", UpdateCategory)
 	return mux
 }
