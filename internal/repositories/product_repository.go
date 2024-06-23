@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/amarantec/e-commerce/internal/models"
 	"github.com/jackc/pgx/v5"
@@ -99,7 +100,7 @@ func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.P
 	return nil
 }
 
-func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, id int64) ([]models.Product, error) {
+func (r *RepositoryPostgres) FindProductByCategoryId(ctx context.Context, id int64) ([]models.Product, error) {
 	rows, err := r.Conn.Query(
 		ctx,
 		`SELECT id, title, description, image_url, price, category_id FROM products WHERE category_id = $1`,
@@ -126,5 +127,42 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, id int64
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	return products, nil
+}
+
+func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error) {
+	query := `
+	SELECT p.id, p.title, p.description, p.image_url, p.price, p.category_id, c.id, c.name, c.url
+	FROM products AS p
+	INNER JOIN categories AS c ON p.category_id = c.id
+	WHERE c.url = $1`
+
+	rows, err := r.Conn.Query(ctx, query, categoryUrl)
+
+	if err != nil {
+		return nil, fmt.Errorf("error querying: %v", err)
+	}
+	defer rows.Close()
+
+	var products []models.Product
+
+	for rows.Next() {
+		var product models.Product
+		var category models.Category
+
+		err := rows.Scan(&product.ID, &product.Title, &product.Description, &product.ImageURL, &product.Price, &product.CategoryId, &category.Id, &category.Name, &category.Url)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %v", err)
+		}
+
+		product.Category = category
+
+		products = append(products, product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over results: %v", err)
+	}
+
 	return products, nil
 }
