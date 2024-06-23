@@ -18,6 +18,7 @@ func ListProducts(w http.ResponseWriter, r *http.Request) {
 
 	products, err := service.FindAllProducts(ctxTimeout)
 	if err != nil {
+		fmt.Printf("Error: %v", err)
 		http.Error(w, "Could not search products", http.StatusInternalServerError)
 		return
 	}
@@ -68,6 +69,7 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	product, err := service.FindProductByID(ctxTimeout, int64(id))
 	if err != nil {
+		fmt.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -134,4 +136,34 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(fmt.Sprintf("Product %d updated", id)))
+}
+
+func ListProductsByCategory(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Path[len("/product-category/"):]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	products, err := service.FindProductByCategory(ctxTimeout, int64(id))
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResp, err := json.MarshalIndent(products, "", " ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
 }
