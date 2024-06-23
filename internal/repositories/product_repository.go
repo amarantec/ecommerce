@@ -14,6 +14,7 @@ type Repository interface {
 	FindAll(ctx context.Context) ([]models.Product, error)
 	FindOneByID(ctx context.Context, id int64) (models.Product, error)
 	Delete(ctx context.Context, id int64) error
+	Update(ctx context.Context, prodcut models.Product, id int64) error
 }
 
 type RepositoryPostgres struct {
@@ -94,4 +95,16 @@ func (r *RepositoryPostgres) FindOneByID(ctx context.Context, id int64) (models.
 	}
 
 	return prodcut, nil
+}
+
+func (r *RepositoryPostgres) Update(ctx context.Context, product models.Product, id int64) error {
+	_, err := r.Conn.Exec(
+		ctx,
+		`UPDATE products SET title = $2, description = $3, image_url = $4, price = $5 WHERE id =$1`,
+		id, product.Title, product.Description, product.ImageURL, product.Price)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

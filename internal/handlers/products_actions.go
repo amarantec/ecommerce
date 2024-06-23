@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -121,4 +122,33 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Path[len("/update-product/"):]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	var product models.Product
+
+	err = json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		http.Error(w, "Could not parse json", http.StatusInternalServerError)
+		return
+	}
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := service.Update(ctxTimeout, product, int64(id)); err != nil {
+		http.Error(w, "Could not update this product", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("Product %d updated", id)))
 }

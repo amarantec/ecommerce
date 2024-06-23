@@ -52,3 +52,12 @@ func (s Service) FindAll(ctx context.Context) ([]models.Product, error) {
 
 	return products, nil
 }
+
+func (s Service) Update(ctx context.Context, product models.Product, id int64) error {
+	err := s.Repository.Update(ctx, product, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
