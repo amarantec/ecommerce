@@ -16,9 +16,6 @@ func (s Service) CreateProduct(ctx context.Context, product models.Product) (mod
 	if product.ImageURL == "" {
 		return models.Product{}, ErrImageUrlEmpty
 	}
-	if product.Price == 0 {
-		return models.Product{}, ErrProductPriceEmpty
-	}
 
 	return s.Repository.InsertProduct(ctx, product)
 }
