@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/amarantec/e-commerce/internal/models"
 	"github.com/amarantec/e-commerce/internal/services"
 )
@@ -15,7 +14,6 @@ import (
 func ListCategories(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
 	categories, err := service.FindAllCategories(ctxTimeout)
 	if err != nil {
 		http.Error(w, "Could not search categories", http.StatusInternalServerError)

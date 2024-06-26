@@ -7,5 +7,5 @@ type Product struct {
 	ImageURL    string           `json:"image_url"`
 	Category    Category         `json:"category"`
 	CategoryId  int64            `json:"category_id"`
-	Variants    []ProductVariant `json:"variants"`
+	Variants    ProductVariant   `json:"variants"`
 }

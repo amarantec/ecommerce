@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/amarantec/e-commerce/internal/models"
 	"github.com/jackc/pgx/v5"
 )
@@ -38,10 +37,27 @@ func (r *RepositoryPostgres) DeleteProduct(ctx context.Context, id int64) error 
 func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Product, error) {
 	rows, err := r.Conn.Query(
 		ctx,
-		`SELECT p.id, p.title, p.description, p.image_url, p.category_id, c.id, c.name, c.url
+		/*`SELECT p.id, p.title, p.description, p.image_url, p.category_id, c.id, c.name, c.url
 		FROM products AS p
-		INNER JOIN categories AS c ON p.category_id = c.id`,
-	)
+		INNER JOIN categories AS c ON p.category_id = c.id`,*/
+		`SELECT   p.id,
+		p.title,
+		p.description,
+		p.image_url,
+		p.category_id,
+		c.id,
+		c.name,
+		c.url,
+		pv.product_id,
+		pv.product_type_id,
+		pv.price,
+		pv.original_price,
+		pt.id,
+		pt.name
+		FROM products AS p
+		JOIN categories AS c on p.category_id = c.id
+		LEFT JOIN product_variants AS pv on p.id = pv.product_id
+		LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id;`)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +67,8 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 	for rows.Next() {
 		var product models.Product
 		var category models.Category
+		var pv models.ProductVariant
+		var pt models.ProductType
 		if err := rows.Scan(
 			&product.ID,
 			&product.Title,
@@ -59,10 +77,18 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 			&product.CategoryId,
 			&category.Id,
 			&category.Name,
-			&category.Url); err != nil {
+			&category.Url,
+			&pv.ProductId,
+			&pv.ProductTypeId,
+			&pv.Price,
+			&pv.OriginalPrice,
+			&pt.Id,
+			&pt.Name); err != nil {
 			return nil, err
 		}
 		product.Category = category
+		pv.ProductType = pt
+		product.Variants = pv
 		products = append(products, product)
 	}
 	if err := rows.Err(); err != nil {
@@ -101,6 +127,8 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 
 	return product, nil
 }
+
+
 
 func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
 	_, err := r.Conn.Exec(
