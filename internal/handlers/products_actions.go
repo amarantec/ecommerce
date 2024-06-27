@@ -138,36 +138,6 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Product %d updated", id)))
 }
 
-func ListProductsByCategoryId(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Path[len("/product-category-id/"):]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		fmt.Printf("Error: %v", err)
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	products, err := service.FindProductByCategoryId(ctxTimeout, int64(id))
-	if err != nil {
-		fmt.Printf("Error: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	jsonResp, err := json.MarshalIndent(products, "", " ")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResp)
-}
-
 func ListProductsByCategory(w http.ResponseWriter, r *http.Request) {
 	categoryUrl := r.URL.Path[len("/product-category/"):]
 

@@ -37,9 +37,6 @@ func (r *RepositoryPostgres) DeleteProduct(ctx context.Context, id int64) error 
 func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Product, error) {
 	rows, err := r.Conn.Query(
 		ctx,
-		/*`SELECT p.id, p.title, p.description, p.image_url, p.category_id, c.id, c.name, c.url
-		FROM products AS p
-		INNER JOIN categories AS c ON p.category_id = c.id`,*/
 		`SELECT   p.id,
 		p.title,
 		p.description,
@@ -100,22 +97,47 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (models.Product, error) {
 	var product = models.Product{ID: id}
 	var category models.Category
+	var pt models.ProductType
+	var pv models.ProductVariant
 	err := r.Conn.QueryRow(
 		ctx,
-		`SELECT p.title, p.description, p.image_url, p.category_id, c.id, c.name, c.url
+		`SELECT   p.id,
+		p.title,
+		p.description,
+		p.image_url,
+		p.category_id,
+		c.id,
+		c.name,
+		c.url,
+		pv.product_id,
+		pv.product_type_id,
+		pv.price,
+		pv.original_price,
+		pt.id,
+		pt.name
 		FROM products AS p
-		INNER JOIN categories AS c ON p.category_id = c.id
+		JOIN categories AS c on p.category_id = c.id
+		LEFT JOIN product_variants AS pv on p.id = pv.product_id
+		LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
  		WHERE p.id = $1`,
-		id).Scan(
-		&product.Title,
-		&product.Description,
-		&product.ImageURL,
-		&product.CategoryId,
-		&category.Id,
-		&category.Name,
-		&category.Url)
+		id).Scan(&product.ID,
+			&product.Title,
+			&product.Description,
+			&product.ImageURL,
+			&product.CategoryId,
+			&category.Id,
+			&category.Name,
+			&category.Url,
+			&pv.ProductId,
+			&pv.ProductTypeId,
+			&pv.Price,
+			&pv.OriginalPrice,
+			&pt.Id,
+			&pt.Name)
 
 	product.Category = category
+	pv.ProductType = pt
+	product.Variants = pv
 
 	if err == pgx.ErrNoRows {
 		return models.Product{}, errors.New("product not found")
@@ -142,40 +164,27 @@ func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.P
 	return nil
 }
 
-func (r *RepositoryPostgres) FindProductByCategoryId(ctx context.Context, id int64) ([]models.Product, error) {
-	rows, err := r.Conn.Query(
-		ctx,
-		`SELECT id, title, description, image_url, category_id FROM products WHERE category_id = $1`,
-		id)
-	if err != nil {
-		return nil, err
-	}
-
-	var products []models.Product
-	for rows.Next() {
-		var product models.Product
-		if err := rows.Scan(
-			&product.ID,
-			&product.Title,
-			&product.Description,
-			&product.ImageURL,
-			&product.CategoryId); err != nil {
-			return nil, err
-		}
-		products = append(products, product)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return products, nil
-}
 
 func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error) {
 	query := `
-	SELECT p.id, p.title, p.description, p.image_url, p.category_id, c.id, c.name, c.url
+	SELECT   p.id,
+	p.title,
+	p.description,
+	p.image_url,
+	p.category_id,
+	c.id,
+	c.name,
+	c.url,
+	pv.product_id,
+	pv.product_type_id,
+	pv.price,
+	pv.original_price,
+	pt.id,
+	pt.name
 	FROM products AS p
-	INNER JOIN categories AS c ON p.category_id = c.id
+	JOIN categories AS c on p.category_id = c.id
+	LEFT JOIN product_variants AS pv on p.id = pv.product_id
+	LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
 	WHERE c.url = $1`
 
 	rows, err := r.Conn.Query(ctx, query, categoryUrl)
@@ -190,14 +199,30 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 	for rows.Next() {
 		var product models.Product
 		var category models.Category
+		var pv models.ProductVariant
+		var pt models.ProductType
 
-		err := rows.Scan(&product.ID, &product.Title, &product.Description, &product.ImageURL, &product.CategoryId, &category.Id, &category.Name, &category.Url)
+		err := rows.Scan(&product.ID,
+				 &product.Title,
+				 &product.Description,
+				 &product.ImageURL,
+				 &product.CategoryId,
+				 &category.Id,
+				 &category.Name,
+				 &category.Url,
+				 &pv.ProductId,
+				 &pv.ProductTypeId,
+				 &pv.Price,
+				 &pv.OriginalPrice,
+				 &pt.Id,
+				 &pt.Name)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}
 
 		product.Category = category
-
+		pv.ProductType = pt
+		product.Variants = pv
 		products = append(products, product)
 	}
 

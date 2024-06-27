@@ -10,7 +10,6 @@ func SetRoutes() *http.ServeMux {
 	mux.HandleFunc("/product/{id}", GetProductByID)
 	mux.HandleFunc("/delete-product/{id}", DeleteProduct)
 	mux.HandleFunc("/update-product/{id}", UpdateProduct)
-	mux.HandleFunc("/product-category-id/{id}", ListProductsByCategoryId)
 	mux.HandleFunc("/product-category/{categoryUrl}", ListProductsByCategory)
 
 	mux.HandleFunc("/categories", ListCategories)

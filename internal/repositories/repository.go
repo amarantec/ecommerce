@@ -13,7 +13,6 @@ type Repository interface {
 	FindProductByID(ctx context.Context, id int64) (models.Product, error)
 	DeleteProduct(ctx context.Context, id int64) error
 	UpdateProduct(ctx context.Context, prodcut models.Product, id int64) error
-	FindProductByCategoryId(ctx context.Context, id int64) ([]models.Product, error)
 	FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error)
 
 	InsertCategory(ctx context.Context, category models.Category) (models.Category, error)

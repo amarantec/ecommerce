@@ -46,9 +46,6 @@ func (s Service) UpdateProduct(ctx context.Context, product models.Product, id i
 	return nil
 }
 
-func (s Service) FindProductByCategoryId(ctx context.Context, id int64) ([]models.Product, error) {
-	return s.Repository.FindProductByCategoryId(ctx, id)
-}
 
 func (s Service) FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error) {
 	products, err := s.Repository.FindProductByCategory(ctx, categoryUrl)
