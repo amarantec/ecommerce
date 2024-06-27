@@ -48,7 +48,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 		pv.product_id,
 		pv.product_type_id,
 		pv.price,
-		pv.original_price,
+		COALESCE(pv.original_price, 0.0) AS original_price,
 		pt.id,
 		pt.name
 		FROM products AS p
@@ -83,6 +83,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 			&pt.Name); err != nil {
 			return nil, err
 		}
+
 		product.Category = category
 		pv.ProductType = pt
 		product.Variants = pv
@@ -112,7 +113,7 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 		pv.product_id,
 		pv.product_type_id,
 		pv.price,
-		pv.original_price,
+		COALESCE(pv.original_price, 0.0) AS original_price,
 		pt.id,
 		pt.name
 		FROM products AS p
@@ -178,7 +179,7 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 	pv.product_id,
 	pv.product_type_id,
 	pv.price,
-	pv.original_price,
+	COALESCE(pv.original_price, 0.0) AS original_price,
 	pt.id,
 	pt.name
 	FROM products AS p
