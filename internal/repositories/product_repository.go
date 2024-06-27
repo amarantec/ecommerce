@@ -206,7 +206,7 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 		err := rows.Scan(&product.ID,
 				 &product.Title,
 				 &product.Description,
-				 &product.ImageURL,
+				 // &product.ImageURL,
 				 &product.CategoryId,
 				 &category.Id,
 				 &category.Name,
@@ -231,5 +231,70 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 		return nil, fmt.Errorf("error iterating over results: %v", err)
 	}
 
+	return products, nil
+}
+
+func (r *RepositoryPostgres) SearchProducts(ctx context.Context, searchQ string) ([]models.Product, error) {
+	rows, err := r.Conn.Query(
+		ctx,
+		`SELECT   p.id,
+		p.title,
+		p.description,
+		p.image_url,
+		p.category_id,
+		c.id,
+		c.name,
+		c.url,
+		pv.product_id,
+		pv.product_type_id,
+		pv.price,
+		COALESCE(pv.original_price, 0.0) AS original_price,
+				  pt.id,
+			   pt.name
+			   FROM products AS p
+			   JOIN categories AS c on p.category_id = c.id
+			   LEFT JOIN product_variants AS pv on p.id = pv.product_id
+			   LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
+			   WHERE
+			   p.title ILIKE '%' || $1 || '%' OR
+			   p.description ILIKE '%' || $1 || '%';`,
+			   searchQ)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var product models.Product
+		var category models.Category
+		var pv models.ProductVariant
+		var pt models.ProductType
+		if err := rows.Scan(
+			&product.ID,
+		      &product.Title,
+		      &product.Description,
+		      &product.ImageURL,
+		      &product.CategoryId,
+		      &category.Id,
+		      &category.Name,
+		      &category.Url,
+		      &pv.ProductId,
+		      &pv.ProductTypeId,
+		      &pv.Price,
+		      &pv.OriginalPrice,
+		      &pt.Id,
+		      &pt.Name); err != nil {
+			      return nil, err
+		      }
+
+		      product.Category = category
+		      pv.ProductType = pt
+		      product.Variants = pv
+		      products = append(products, product)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return products, nil
 }

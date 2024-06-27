@@ -55,3 +55,12 @@ func (s Service) FindProductByCategory(ctx context.Context, categoryUrl string) 
 
 	return products, nil
 }
+
+
+func (s Service) SearchProducts(ctx context.Context, searchQ string) ([]models.Product, error) {
+	products, err := s.Repository.SearchProducts(ctx, searchQ)
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
+}

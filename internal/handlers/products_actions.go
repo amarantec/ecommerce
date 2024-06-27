@@ -162,3 +162,27 @@ func ListProductsByCategory(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResp)
 }
+
+func SearchProducts(w http.ResponseWriter, r *http.Request) {
+	searchQuery := r.URL.Path[len("/search/"):]
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	products, err := service.SearchProducts(ctxTimeout, searchQuery)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResp, err := json.MarshalIndent(products, "", " ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
+}
