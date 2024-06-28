@@ -17,6 +17,9 @@ var ErrCategoryTitleEmpty = errors.New("category title is empty")
 var ErrCategoryUrlEmpty = errors.New("category url is empty")
 var ErrCategoryNotFound = errors.New("category not found")
 
+var ErrCartItemProductIdEmpty = errors.New("product id is empty")
+var ErrCartItemProductTypeIdEmpty = errors.New("product type id is empty")
+
 type Service struct {
 	Repository repositories.Repository
 }
