@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/amarantec/e-commerce/internal/models"
 	"github.com/jackc/pgx/v5"
 )
@@ -11,11 +12,12 @@ import (
 func (r *RepositoryPostgres) InsertProduct(ctx context.Context, product models.Product) (models.Product, error) {
 	err := r.Conn.QueryRow(
 		ctx,
-		`INSERT INTO products (title, description, image_url, category_id) VALUES ($1, $2, $3, $4) RETURNING id, title, description, image_url, category_id`,
+		`INSERT INTO products (title, description, image_url, category_id, featured) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, description, image_url, category_id`,
 		product.Title,
 		product.Description,
 		product.ImageURL,
-		product.CategoryId).Scan(&product.ID, &product.Title, &product.Description, &product.ImageURL, &product.CategoryId)
+		product.CategoryId,
+		product.Featured).Scan(&product.ID, &product.Title, &product.Description, &product.ImageURL, &product.CategoryId, &product.Featured)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -42,6 +44,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 		p.description,
 		p.image_url,
 		p.category_id,
+		COALESCE(p.featured, false) AS featured,
 		c.id,
 		c.name,
 		c.url,
@@ -72,6 +75,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 			&product.Description,
 			&product.ImageURL,
 			&product.CategoryId,
+			&product.Featured,
 			&category.Id,
 			&category.Name,
 			&category.Url,
@@ -107,6 +111,7 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 		p.description,
 		p.image_url,
 		p.category_id,
+		COALESCE(p.featured, false) AS featured,
 		c.id,
 		c.name,
 		c.url,
@@ -122,19 +127,20 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 		LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
  		WHERE p.id = $1`,
 		id).Scan(&product.ID,
-			&product.Title,
-			&product.Description,
-			&product.ImageURL,
-			&product.CategoryId,
-			&category.Id,
-			&category.Name,
-			&category.Url,
-			&pv.ProductId,
-			&pv.ProductTypeId,
-			&pv.Price,
-			&pv.OriginalPrice,
-			&pt.Id,
-			&pt.Name)
+		&product.Title,
+		&product.Description,
+		&product.ImageURL,
+		&product.CategoryId,
+		&product.Featured,
+		&category.Id,
+		&category.Name,
+		&category.Url,
+		&pv.ProductId,
+		&pv.ProductTypeId,
+		&pv.Price,
+		&pv.OriginalPrice,
+		&pt.Id,
+		&pt.Name)
 
 	product.Category = category
 	pv.ProductType = pt
@@ -151,8 +157,6 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 	return product, nil
 }
 
-
-
 func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
 	_, err := r.Conn.Exec(
 		ctx,
@@ -165,7 +169,6 @@ func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.P
 	return nil
 }
 
-
 func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error) {
 	query := `
 	SELECT   p.id,
@@ -173,6 +176,7 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 	p.description,
 	p.image_url,
 	p.category_id,
+	COALESCE(p.featured, false) AS featured,
 	c.id,
 	c.name,
 	c.url,
@@ -204,19 +208,20 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 		var pt models.ProductType
 
 		err := rows.Scan(&product.ID,
-				 &product.Title,
-				 &product.Description,
-				 // &product.ImageURL,
-				 &product.CategoryId,
-				 &category.Id,
-				 &category.Name,
-				 &category.Url,
-				 &pv.ProductId,
-				 &pv.ProductTypeId,
-				 &pv.Price,
-				 &pv.OriginalPrice,
-				 &pt.Id,
-				 &pt.Name)
+			&product.Title,
+			&product.Description,
+			&product.ImageURL,
+			&product.CategoryId,
+			&product.Featured,
+			&category.Id,
+			&category.Name,
+			&category.Url,
+			&pv.ProductId,
+			&pv.ProductTypeId,
+			&pv.Price,
+			&pv.OriginalPrice,
+			&pt.Id,
+			&pt.Name)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}
@@ -242,6 +247,7 @@ func (r *RepositoryPostgres) SearchProducts(ctx context.Context, searchQ string)
 		p.description,
 		p.image_url,
 		p.category_id,
+		COALESCE(p.featured, false) AS featured,
 		c.id,
 		c.name,
 		c.url,
@@ -258,7 +264,7 @@ func (r *RepositoryPostgres) SearchProducts(ctx context.Context, searchQ string)
 			   WHERE
 			   p.title ILIKE '%' || $1 || '%' OR
 			   p.description ILIKE '%' || $1 || '%';`,
-			   searchQ)
+		searchQ)
 	if err != nil {
 		return nil, err
 	}
@@ -272,29 +278,100 @@ func (r *RepositoryPostgres) SearchProducts(ctx context.Context, searchQ string)
 		var pt models.ProductType
 		if err := rows.Scan(
 			&product.ID,
-		      &product.Title,
-		      &product.Description,
-		      &product.ImageURL,
-		      &product.CategoryId,
-		      &category.Id,
-		      &category.Name,
-		      &category.Url,
-		      &pv.ProductId,
-		      &pv.ProductTypeId,
-		      &pv.Price,
-		      &pv.OriginalPrice,
-		      &pt.Id,
-		      &pt.Name); err != nil {
-			      return nil, err
-		      }
+			&product.Title,
+			&product.Description,
+			&product.ImageURL,
+			&product.CategoryId,
+			&product.Featured,
+			&category.Id,
+			&category.Name,
+			&category.Url,
+			&pv.ProductId,
+			&pv.ProductTypeId,
+			&pv.Price,
+			&pv.OriginalPrice,
+			&pt.Id,
+			&pt.Name); err != nil {
+			return nil, err
+		}
 
-		      product.Category = category
-		      pv.ProductType = pt
-		      product.Variants = pv
-		      products = append(products, product)
+		product.Category = category
+		pv.ProductType = pt
+		product.Variants = pv
+		products = append(products, product)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	return products, nil
+}
+
+func (r *RepositoryPostgres) GetFeaturedProducts(ctx context.Context) ([]models.Product, error) {
+	query := `
+        SELECT   p.id,
+        p.title,
+        p.description,
+        p.image_url,
+        p.category_id,
+        COALESCE(p.featured, false) AS featured,
+        c.id,
+        c.name,
+        c.url,
+        pv.product_id,
+        pv.product_type_id,
+        pv.price,
+        COALESCE(pv.original_price, 0.0) AS original_price,
+        pt.id,
+        pt.name
+        FROM products AS p
+        JOIN categories AS c on p.category_id = c.id
+        LEFT JOIN product_variants AS pv on p.id = pv.product_id
+        LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
+        WHERE p.featured = true`
+
+	rows, err := r.Conn.Query(ctx, query)
+
+	if err != nil {
+		return nil, fmt.Errorf("error querying: %v", err)
+	}
+	defer rows.Close()
+
+	var products []models.Product
+
+	for rows.Next() {
+		var product models.Product
+		var category models.Category
+		var pv models.ProductVariant
+		var pt models.ProductType
+
+		err := rows.Scan(&product.ID,
+			&product.Title,
+			&product.Description,
+			&product.ImageURL,
+			&product.CategoryId,
+			&product.Featured,
+			&category.Id,
+			&category.Name,
+			&category.Url,
+			&pv.ProductId,
+			&pv.ProductTypeId,
+			&pv.Price,
+			&pv.OriginalPrice,
+			&pt.Id,
+			&pt.Name)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %v", err)
+		}
+
+		product.Category = category
+		pv.ProductType = pt
+		product.Variants = pv
+		products = append(products, product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over results: %v", err)
+	}
+
 	return products, nil
 }

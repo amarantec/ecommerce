@@ -186,3 +186,26 @@ func SearchProducts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResp)
 }
+
+func GetFeaturedProducts(w http.ResponseWriter, r *http.Request) {
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	response, err := service.GetFeaturedProducts(ctxTimeout)
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResp, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		fmt.Errorf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
+}
