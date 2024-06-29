@@ -171,7 +171,6 @@ func SearchProducts(w http.ResponseWriter, r *http.Request) {
 
 	products, err := service.SearchProducts(ctxTimeout, searchQuery)
 	if err != nil {
-		fmt.Errorf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -193,14 +192,12 @@ func GetFeaturedProducts(w http.ResponseWriter, r *http.Request) {
 
 	response, err := service.GetFeaturedProducts(ctxTimeout)
 	if err != nil {
-		fmt.Errorf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	jsonResp, err := json.MarshalIndent(response, "", " ")
 	if err != nil {
-		fmt.Errorf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

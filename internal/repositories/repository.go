@@ -16,8 +16,6 @@ type Repository interface {
 	FindProductByCategory(ctx context.Context, categoryUrl string) ([]models.Product, error)
 	SearchProducts(ctx context.Context, searchQ string) ([]models.Product, error)
 	GetFeaturedProducts(ctx context.Context) ([]models.Product, error)
-	AddToCart(ctx context.Context, cartItem models.CartItem) (models.CartItem, error)
-	GetCartItems(ctx context.Context) ([]models.CartItem, error)
 	InsertCategory(ctx context.Context, category models.Category) (models.Category, error)
 	DeleteCategory(ctx context.Context, id int64) error
 	FindAllCategories(ctx context.Context) ([]models.Category, error)
