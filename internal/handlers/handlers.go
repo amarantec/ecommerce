@@ -8,6 +8,7 @@ import (
 
 var service services.Service
 
+
 func Configure() {
 	service = services.Service{
 		Repository: &repositories.RepositoryPostgres{
