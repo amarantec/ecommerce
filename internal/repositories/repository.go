@@ -21,6 +21,8 @@ type Repository interface {
 	FindAllCategories(ctx context.Context) ([]models.Category, error)
 	FindCategoryById(ctx context.Context, id int64) (models.Category, error)
 	UpdateCategory(ctx context.Context, category models.Category, id int64) error
+	Save(ctx context.Context, user models.UserRegister) (models.UserRegister, error)
+	ValidateCredentials(ctx context.Context, user models.UserRegister) error
 }
 
 type RepositoryPostgres struct {

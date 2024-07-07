@@ -12,7 +12,7 @@ import (
 func (r *RepositoryPostgres) InsertProduct(ctx context.Context, product models.Product) (models.Product, error) {
 	err := r.Conn.QueryRow(
 		ctx,
-		`INSERT INTO products (title, description, image_url, category_id, featured) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, description, image_url, category_id`,
+		`INSERT INTO products (title, description, image_url, category_id, featured) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, description, image_url, category_id, featured`,
 		product.Title,
 		product.Description,
 		product.ImageURL,

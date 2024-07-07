@@ -13,7 +13,7 @@ import (
 	"github.com/amarantec/e-commerce/internal/services"
 )
 
-func ListCategories(w http.ResponseWriter, r *http.Request) {
+func listCategories(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	categories, err := service.FindAllCategories(ctxTimeout)
@@ -33,7 +33,7 @@ func ListCategories(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func InsertCategory(w http.ResponseWriter, r *http.Request) {
+func insertCategory(w http.ResponseWriter, r *http.Request) {
 	var newCategory models.Category
 
 	err := json.NewDecoder(r.Body).Decode(&newCategory)
@@ -57,7 +57,7 @@ func InsertCategory(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetCategoryById(w http.ResponseWriter, r *http.Request) {
+func getCategoryById(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/category/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -86,7 +86,7 @@ func GetCategoryById(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func DeleteCategory(w http.ResponseWriter, r *http.Request) {
+func deleteCategory(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/delete-category/"):]
 	id, err := strconv.Atoi(idStr)
 
@@ -109,7 +109,7 @@ func DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func UpdateCategory(w http.ResponseWriter, r *http.Request) {
+func updateCategory(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/update-category/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

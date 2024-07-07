@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,7 +13,7 @@ import (
 	"github.com/amarantec/e-commerce/internal/services"
 )
 
-func ListProducts(w http.ResponseWriter, r *http.Request) {
+func listProducts(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -33,7 +34,7 @@ func ListProducts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func InsertProduct(w http.ResponseWriter, r *http.Request) {
+func insertProduct(w http.ResponseWriter, r *http.Request) {
 	var newProduct models.Product
 
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
@@ -46,6 +47,7 @@ func InsertProduct(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if nP, err := service.CreateProduct(ctxTimeout, newProduct); err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, "Could not insert this product", http.StatusInternalServerError)
 	} else if jsonResp, err := json.MarshalIndent(nP, "", " "); err != nil {
 		http.Error(w, "Could not marshal this response", http.StatusBadRequest)
@@ -56,7 +58,7 @@ func InsertProduct(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetProductByID(w http.ResponseWriter, r *http.Request) {
+func getProductByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/product/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -85,7 +87,7 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+func deleteProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/delete-product/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -109,7 +111,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func updateProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Path[len("/update-product/"):]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -138,7 +140,7 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("Product %d updated", id)))
 }
 
-func ListProductsByCategory(w http.ResponseWriter, r *http.Request) {
+func listProductsByCategory(w http.ResponseWriter, r *http.Request) {
 	categoryUrl := r.URL.Path[len("/product-category/"):]
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -163,7 +165,7 @@ func ListProductsByCategory(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func SearchProducts(w http.ResponseWriter, r *http.Request) {
+func searchProducts(w http.ResponseWriter, r *http.Request) {
 	searchQuery := r.URL.Path[len("/search/"):]
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -186,7 +188,7 @@ func SearchProducts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-func GetFeaturedProducts(w http.ResponseWriter, r *http.Request) {
+func getFeaturedProducts(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

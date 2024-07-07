@@ -34,10 +34,10 @@ func main() {
 
 	mux := handlers.SetRoutes()
 
-	//port := fmt.Sprintf(":%s", configs.GetServerPort())
+	port := fmt.Sprintf(":%s", configs.GetServerPort())
 
 	server := &http.Server{
-		Addr:    "0.0.0.0:8080",
+		Addr:    port,
 		Handler: mux,
 	}
 	fmt.Printf("Server listen on: %s\n", server.Addr)
