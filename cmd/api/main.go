@@ -5,24 +5,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/amarantec/e-commerce/configs"
 	"github.com/amarantec/e-commerce/internal/database"
 	"github.com/amarantec/e-commerce/internal/handlers"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	ctx := context.Background()
-
-	err := configs.Load()
+	err := godotenv.Load("../../env/.env")
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	conf := configs.GetDB()
+	ctx := context.Background()
+
+	serverPort := os.Getenv("SERVER_PORT")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	if dbHost == "" || dbPort == "" || dbUser == "" || dbPassword == "" || dbName == "" || serverPort == "" {
+		log.Fatal("one or more environment variables are not set")
+	}
 
 	connectionString := fmt.Sprintf(`host=%s port=%s user=%s password=%s dbname=%s sslmode=disable`,
-		conf.Host, conf.Port, conf.User, conf.Pass, conf.Database)
+		dbHost, dbPort, dbUser, dbPassword, dbName)
 
 	Conn, err := database.OpenConnection(ctx, connectionString)
 	if err != nil {
@@ -34,7 +44,7 @@ func main() {
 
 	mux := handlers.SetRoutes()
 
-	port := fmt.Sprintf(":%s", configs.GetServerPort())
+	port := fmt.Sprintf(":%s", serverPort)
 
 	server := &http.Server{
 		Addr:    port,
@@ -42,4 +52,5 @@ func main() {
 	}
 	fmt.Printf("Server listen on: %s\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
+
 }
