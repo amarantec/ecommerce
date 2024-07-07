@@ -4,4 +4,4 @@ cd cmd/api
 
 go build -o app
 
-./app -config config.toml 
+./app
