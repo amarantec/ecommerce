@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/amarantec/e-commerce/internal/models"
+	"github.com/amarantec/e-commerce/internal/utils"
 )
 
 func signUp(w http.ResponseWriter, r *http.Request) {
@@ -48,14 +49,27 @@ func login(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := service.Login(ctxTimeout, user); err != nil {
+	err = service.Login(ctxTimeout, user)
+	if err != nil {
 		log.Printf("Error: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	} else if jsonResp, err := json.MarshalIndent("Login successfull", "", " "); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(jsonResp)
+		return
 	}
+
+	token, err := utils.GenerateToken(user.Id, user.Email)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResp, err := json.MarshalIndent(token, "", " ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Print("Login successfull")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResp)
 }
