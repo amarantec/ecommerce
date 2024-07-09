@@ -1,7 +1,7 @@
-#!/usr/bin/zsh
+#!/bin/csh
 
 cd cmd/api
 
-go build -o app
+go122 build -o app
 
 ./app

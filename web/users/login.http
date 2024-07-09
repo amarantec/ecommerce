@@ -1,0 +1,7 @@
+POST http://192.168.1.11:8080/login
+Content-Type: application/json
+
+{
+    "email": "carvalho@test.com",
+    "password":"test"
+}

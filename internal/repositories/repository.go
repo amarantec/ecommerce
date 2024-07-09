@@ -23,6 +23,7 @@ type Repository interface {
 	UpdateCategory(ctx context.Context, category models.Category, id int64) error
 	Save(ctx context.Context, user models.UserRegister) (models.UserRegister, error)
 	ValidateCredentials(ctx context.Context, user models.UserRegister) error
+	AddToCart(ctx context.Context, cartItems models.CartItem) (models.CartItem, error)
 }
 
 type RepositoryPostgres struct {

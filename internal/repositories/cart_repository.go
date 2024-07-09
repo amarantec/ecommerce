@@ -21,6 +21,7 @@ func (r *RepositoryPostgres) AddToCart(ctx context.Context, cartItems models.Car
 	return cartItems, nil
 }
 
+/*
 func (r *RepositoryPostgres) GetCartItems(ctx context.Context, cartItems models.CartItem) ([]models.CartItem, error) {
 	var product = models.Product
 	var pt = models.ProductType
@@ -30,10 +31,10 @@ func (r *RepositoryPostgres) GetCartItems(ctx context.Context, cartItems models.
 		pt.id,
 		ci.quantity
 		FROM products AS p
-		JOIN product_type 
-		
-		
+		JOIN product_type
+
+
 		`
 
 	)
-}
+}*/

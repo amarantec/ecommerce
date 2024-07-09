@@ -20,6 +20,10 @@ var ErrCategoryNotFound = errors.New("category not found")
 var ErrUserEmailEmpty = errors.New("user email is empty")
 var ErrUserPasswordEmpty = errors.New("user password is empty")
 
+var ErrCartProductIdEmpty = errors.New("product id is empty")
+var ErrCartProductTypeIdEmpty = errors.New("product type id is empty")
+var ErrCartQuantityEmpty = errors.New("cart quantity is empty")
+
 type Service struct {
 	Repository repositories.Repository
 }
