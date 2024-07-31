@@ -12,12 +12,12 @@ import (
 func (r *RepositoryPostgres) InsertProduct(ctx context.Context, product models.Product) (models.Product, error) {
 	err := r.Conn.QueryRow(
 		ctx,
-		`INSERT INTO products (title, description, image_url, category_id, featured) VALUES ($1, $2, $3, $4, $5) RETURNING id, title, description, image_url, category_id, featured`,
+		`INSERT INTO products (title, description, image_url, category_id, featured) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
 		product.Title,
 		product.Description,
 		product.ImageURL,
 		product.CategoryId,
-		product.Featured).Scan(&product.ID, &product.Title, &product.Description, &product.ImageURL, &product.CategoryId, &product.Featured)
+		product.Featured).Scan(&product.ID)
 	if err != nil {
 		return models.Product{}, err
 	}

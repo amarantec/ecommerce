@@ -23,7 +23,7 @@ func (r *RepositoryPostgres) Save(ctx context.Context, user models.UserRegister)
 	return user, nil
 }
 
-func (r *RepositoryPostgres) ValidateCredentials(ctx context.Context, user models.UserRegister) error {
+func (r *RepositoryPostgres) ValidateCredentials(ctx context.Context, user models.UserRegister) (int64, error) {
 	var retriviedPassword string
 
 	err := r.Conn.QueryRow(
@@ -31,12 +31,12 @@ func (r *RepositoryPostgres) ValidateCredentials(ctx context.Context, user model
 		`SELECT id, password FROM users WHERE  email = $1 `, user.Email,
 	).Scan(&user.Id, &retriviedPassword)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	passwordIsValid := utils.CheckPasswordHash(user.Password, retriviedPassword)
 	if !passwordIsValid {
-		return errors.New("credentials invalid")
+		return 0, errors.New("credentials invalid")
 	}
 
-	return nil
+	return user.Id, nil
 }

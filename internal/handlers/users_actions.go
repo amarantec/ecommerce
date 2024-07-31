@@ -49,13 +49,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err = service.Login(ctxTimeout, user)
+  id,	err = service.Login(ctxTimeout, user)
 	if err != nil {
 		log.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+  user.Id = id
 	token, err := utils.GenerateToken(user.Id, user.Email)
 	if err != nil {
 		log.Printf("Error: %v", err)
@@ -68,6 +69,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	log.Print("Login successfull")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
