@@ -11,12 +11,6 @@ import (
 )
 
 func addToCart(w http.ResponseWriter, r *http.Request) {
-	token := w.Header().Get("Authorization")
-	if token == "" {
-		http.Error(w, "Not authorized", http.StatusUnauthorized)
-		return
-	}
-
 	var newItem models.CartItem
 
 	err := json.NewDecoder(r.Body).Decode(&newItem)

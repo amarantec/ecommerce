@@ -11,8 +11,8 @@ import (
 func (r *RepositoryPostgres) InsertCategory(ctx context.Context, category models.Category) (models.Category, error) {
 	err := r.Conn.QueryRow(
 		ctx,
-		`INSERT INTO categories (name, url) VALUES ($1, $2) RETURNING id, name, url`,
-		category.Name, category.Url).Scan(&category.Id, &category.Name, &category.Url)
+		`INSERT INTO categories (name, url) VALUES ($1, $2) RETURNING id`,
+		category.Name, category.Url).Scan(&category.Id)
 	if err != nil {
 		return models.Category{}, err
 	}
