@@ -49,7 +49,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-  id,	err = service.Login(ctxTimeout, user)
+  id,	err := service.Login(ctxTimeout, user)
 	if err != nil {
 		log.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

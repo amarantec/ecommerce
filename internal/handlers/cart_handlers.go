@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -20,12 +19,11 @@ func addToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	nI, err := service.AddToCart(ctxTimeout, newItem)
 	if err != nil {
-		log.Fatalf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -39,4 +37,25 @@ func addToCart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(jsonResp)
+}
+
+func getCartItems(w http.ResponseWriter, r *http.Request) {
+  ctxTimeout, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+  defer cancel()
+
+  cartItems, err := service.GetCartItems(ctxTimeout)
+  if err != nil {
+      http.Error(w "could not get cart items", http.StatusInternalServerError)
+      return
+  }
+
+  jsonResp, err := json.MarshalIndent(cartItems, "", " ")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    return
+  }
+
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOK)
+  w.Write(jsonResp)
 }

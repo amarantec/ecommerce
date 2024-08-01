@@ -9,15 +9,9 @@ import (
 
 	"github.com/amarantec/e-commerce/internal/database"
 	"github.com/amarantec/e-commerce/internal/handlers"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load("../../env/.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
 	ctx := context.Background()
 
 	serverPort := os.Getenv("SERVER_PORT")
@@ -52,5 +46,4 @@ func main() {
 	}
 	fmt.Printf("Server listen on: %s\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
-
 }

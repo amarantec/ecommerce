@@ -27,6 +27,8 @@ type Repository interface {
 	ValidateCredentials(ctx context.Context, user models.UserRegister) (int64, error)
 
 	AddToCart(ctx context.Context, cartItems models.CartItem) (models.CartItem, error)
+  GetCartItems(ctx context.Context) ([]models.CartItem, error)
+  UpdateCartItems(ctx context.Context, cartItem models.CartItem, id int64) error
 }
 
 type RepositoryPostgres struct {

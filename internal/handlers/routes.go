@@ -1,6 +1,9 @@
 package handlers
 
-import "net/http"
+import (
+  "net/http"
+  "github.com/amarantec/e-commerce/internal/middleware"
+)
 
 func SetRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
@@ -22,6 +25,7 @@ func SetRoutes() *http.ServeMux {
 	mux.HandleFunc("/signup", signUp)
 	mux.HandleFunc("/login", login)
 
-	mux.HandleFunc("/add-to-cart", addToCart)
+	mux.HandleFunc("/add-to-cart", middleware.Authenticate(addToCart))
+  mux.HandleFunc("/remove-to-cart", middleware.Authenticate(removeToCart))
 	return mux
 }

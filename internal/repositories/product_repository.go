@@ -157,10 +157,11 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 	return product, nil
 }
 
-func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
+func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, id int64) error {
+  var product models.Product
 	_, err := r.Conn.Exec(
 		ctx,
-		`UPDATE products SET title = $2, description = $3, image_url = $4, category_id = $5 WHERE id =$1`,
+		`UPDATE products SET title = $2, description = $3, image_url = $4, category_id = $5 WHERE id = $1;`,
 		id, product.Title, product.Description, product.ImageURL, product.CategoryId)
 
 	if err != nil {

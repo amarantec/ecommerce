@@ -17,6 +17,6 @@ func (s Service) Save(ctx context.Context, user models.UserRegister) (models.Use
 	return s.Repository.Save(ctx, user)
 }
 
-func (s Service) Login(ctx context.Context, user models.UserRegister) error {
+func (s Service) Login(ctx context.Context, user models.UserRegister) (int64, error) {
 	return s.Repository.ValidateCredentials(ctx, user)
 }

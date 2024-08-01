@@ -4,7 +4,7 @@ import (
   "context"
   "net/http"
 
-  "github.com/amarantec/ecommerce/internal/utils"
+  "github.com/amarantec/e-commerce/internal/utils"
 )
 
 type contextKey string
@@ -12,7 +12,7 @@ type contextKey string
 const UserIdKey contextKey = "UserId"
 
 func Authenticate (next http.HandlerFunc) http.HandlerFunc {
-  return (w http.ResponseWriter, r *http.Request) {
+  return func (w http.ResponseWriter, r *http.Request) {
     token := r.Header.Get("Authorization")
     if token == "" {
       http.Error(w, "token is empty", http.StatusUnauthorized)
