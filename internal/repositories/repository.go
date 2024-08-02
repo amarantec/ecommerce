@@ -29,6 +29,9 @@ type Repository interface {
 	AddToCart(ctx context.Context, cartItems models.CartItem) (models.CartItem, error)
   GetCartItems(ctx context.Context) ([]models.CartItem, error)
   UpdateCartItems(ctx context.Context, cartItem models.CartItem, id int64) error
+
+  InsertAddress(ctx context.Context, address models.Address) (models.Address, error)
+  GetAddress(ctx context.Context, id int64) (models.Address, error)
 }
 
 type RepositoryPostgres struct {

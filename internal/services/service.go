@@ -24,6 +24,15 @@ var ErrCartProductIdEmpty = errors.New("product id is empty")
 var ErrCartProductTypeIdEmpty = errors.New("product type id is empty")
 var ErrCartQuantityEmpty = errors.New("cart quantity is empty")
 
+var ErrAddressUserIdEmpty = errors.New("address user id is empty")
+var ErrAddressFirstNameEmpty = errors.New("address first name is empty")
+var ErrAddressLastNameEmpty = errors.New("address last name is empty")
+var ErrAddressStreetEmpty = errors.New("address street is empty")
+var ErrAddressCityEmpty = errors.New("address city is empty")
+var ErrAddressStateEmpty = errors.New("address state is empty")
+var ErrAddressZipEmpty = errors.New("address zip is empty")
+var ErrAddressCountryEmpty = errors.New("address country is empty")
+
 type Service struct {
 	Repository repositories.Repository
 }
