@@ -1,0 +1,30 @@
+services:
+  ecommerce_db:
+    image: docker.io/library/postgres:13
+    container_name: ecommerce_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD} 
+      POSTGRES_DB: ${DB_NAME} 
+    ports:
+     - "${DB_PORT}:5432" 
+    volumes:
+     - postgres_data:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: .
+    container_name: ecommerce_server
+    depends_on:
+      - ecommerce_db
+    ports:
+     - "${SERVER_PORT}:${SERVER_PORT}" 
+    environment:
+      SERVER_PORT: ${SERVER_PORT} 
+      DB_HOST: ${DB_HOST} 
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER} 
+      DB_PASSWORD: ${DB_PASSWORD} 
+      DB_NAME: ${DB_NAME} 
+volumes:
+  postgres_data:

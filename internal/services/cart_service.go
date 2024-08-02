@@ -23,7 +23,7 @@ func (s Service) AddToCart(ctx context.Context, cartItems models.CartItem) (mode
 }
 
 func (s Service) GetCartItems(ctx context.Context) ([]models.CartItem, error) {
-  cartItems, err := s.Repository.GetCartItems(ctx context.Context)
+  cartItems, err := s.Repository.GetCartItems(ctx)
   if err != nil {
     return nil, err
   }
@@ -31,8 +31,8 @@ func (s Service) GetCartItems(ctx context.Context) ([]models.CartItem, error) {
   return cartItems, nil
 }
 
-func (s Service) UpdateCartItems(ctx context.Context, cartItem model.CartItem, id int64) error {
-  err := s.Repository.UpdateCartItems(ctx, cartItem, id int64)
+func (s Service) UpdateCartItems(ctx context.Context, cartItem models.CartItem, id int64) error {
+  err := s.Repository.UpdateCartItems(ctx, cartItem, id)
   if err != nil {
     return err
   }

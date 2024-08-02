@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
-
+  "strconv"
 	"github.com/amarantec/e-commerce/internal/models"
 )
 
@@ -14,7 +14,6 @@ func addToCart(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newItem)
 	if err != nil {
-		log.Fatalf("Error: %v", err)
 		http.Error(w, "Could not parse this items", http.StatusBadRequest)
 		return
 	}
@@ -45,7 +44,7 @@ func getCartItems(w http.ResponseWriter, r *http.Request) {
 
   cartItems, err := service.GetCartItems(ctxTimeout)
   if err != nil {
-      http.Error(w "could not get cart items", http.StatusInternalServerError)
+      http.Error(w, "could not get cart items", http.StatusInternalServerError)
       return
   }
 
@@ -59,3 +58,32 @@ func getCartItems(w http.ResponseWriter, r *http.Request) {
   w.WriteHeader(http.StatusOK)
   w.Write(jsonResp)
 }
+
+func updateCartItems(w http.ResponseWriter, r *http.Request) {
+  idStr := r.URL.Path[len("/update-cart-item/"):]
+  id, err := strconv.Atoi(idStr)
+  if err != nil {
+    http.Error(w, "invalid id", http.StatusBadRequest)
+    return
+  }
+  
+  var cartItems models.CartItem
+  err = json.NewDecoder(r.Body).Decode(&cartItems)
+  if err != nil {
+    http.Error(w, "could not decode this request", http.StatusBadRequest)
+    return
+  }
+
+  ctxTimeout, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+  defer cancel()
+
+  err = service.UpdateCartItems(ctxTimeout, cartItems, int64(id))
+  if err != nil {
+    http.Error(w, "could not update this cart items", http.StatusInternalServerError)
+    return
+  }
+
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOK)
+}
+
