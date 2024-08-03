@@ -17,7 +17,7 @@ func (r *RepositoryPostgres) InsertProduct(ctx context.Context, product models.P
 		product.Description,
 		product.ImageURL,
 		product.CategoryId,
-		product.Featured).Scan(&product.ID)
+		product.Featured).Scan(&product.Id)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -70,7 +70,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 		var pv models.ProductVariant
 		var pt models.ProductType
 		if err := rows.Scan(
-			&product.ID,
+			&product.Id,
 			&product.Title,
 			&product.Description,
 			&product.ImageURL,
@@ -100,7 +100,7 @@ func (r *RepositoryPostgres) FindAllProducts(ctx context.Context) ([]models.Prod
 }
 
 func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (models.Product, error) {
-	var product = models.Product{ID: id}
+	var product = models.Product{Id: id}
 	var category models.Category
 	var pt models.ProductType
 	var pv models.ProductVariant
@@ -126,7 +126,7 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 		LEFT JOIN product_variants AS pv on p.id = pv.product_id
 		LEFT JOIN product_types AS pt ON pv.product_type_id = pt.id
  		WHERE p.id = $1`,
-		id).Scan(&product.ID,
+		id).Scan(&product.Id,
 		&product.Title,
 		&product.Description,
 		&product.ImageURL,
@@ -157,11 +157,11 @@ func (r *RepositoryPostgres) FindProductByID(ctx context.Context, id int64) (mod
 	return product, nil
 }
 
-func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
+func (r *RepositoryPostgres) UpdateProduct(ctx context.Context, product models.Product) error {
 	_, err := r.Conn.Exec(
 		ctx,
 		`UPDATE products SET title = $2, description = $3, image_url = $4, category_id = $5 WHERE id = $1;`,
-		id, product.Title, product.Description, product.ImageURL, product.CategoryId)
+		product.Id, product.Title, product.Description, product.ImageURL, product.CategoryId)
 
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func (r *RepositoryPostgres) FindProductByCategory(ctx context.Context, category
 		var pv models.ProductVariant
 		var pt models.ProductType
 
-		err := rows.Scan(&product.ID,
+		err := rows.Scan(&product.Id,
 			&product.Title,
 			&product.Description,
 			&product.ImageURL,
@@ -277,7 +277,7 @@ func (r *RepositoryPostgres) SearchProducts(ctx context.Context, searchQ string)
 		var pv models.ProductVariant
 		var pt models.ProductType
 		if err := rows.Scan(
-			&product.ID,
+			&product.Id,
 			&product.Title,
 			&product.Description,
 			&product.ImageURL,
@@ -344,7 +344,7 @@ func (r *RepositoryPostgres) GetFeaturedProducts(ctx context.Context) ([]models.
 		var pv models.ProductVariant
 		var pt models.ProductType
 
-		err := rows.Scan(&product.ID,
+		err := rows.Scan(&product.Id,
 			&product.Title,
 			&product.Description,
 			&product.ImageURL,

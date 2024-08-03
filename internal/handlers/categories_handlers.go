@@ -127,8 +127,10 @@ func updateCategory(w http.ResponseWriter, r *http.Request) {
 
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+  
+  uCategory.Id = int64(id)
 
-	if err := service.UpdateCategory(ctxTimeout, uCategory, int64(id)); err != nil {
+	if err := service.UpdateCategory(ctxTimeout, uCategory); err != nil {
 		http.Error(w, "Could not update this category", http.StatusInternalServerError)
 		return
 	}

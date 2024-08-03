@@ -28,5 +28,10 @@ func SetRoutes() *http.ServeMux {
 	mux.HandleFunc("/add-to-cart", middleware.Authenticate(addToCart))
   mux.HandleFunc("/get-cart-items", middleware.Authenticate(getCartItems))
   mux.HandleFunc("/update-cart-item/{id}", middleware.Authenticate(updateCartItems))
+
+
+  mux.HandleFunc("/insert-address", middleware.Authenticate(insertAddress))
+  mux.HandleFunc("/get-address", middleware.Authenticate(getAddress))
+  mux.HandleFunc("/update-address", middleware.Authenticate(updateAddress))
 	return mux
 }

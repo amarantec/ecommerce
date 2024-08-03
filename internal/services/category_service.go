@@ -33,8 +33,8 @@ func (s Service) FindAllCategories(ctx context.Context) ([]models.Category, erro
 	return categories, nil
 }
 
-func (s Service) UpdateCategory(ctx context.Context, category models.Category, id int64) error {
-	err := s.Repository.UpdateCategory(ctx, category, id)
+func (s Service) UpdateCategory(ctx context.Context, category models.Category) error {
+	err := s.Repository.UpdateCategory(ctx, category)
 	if err != nil {
 		return err
 	}

@@ -130,7 +130,9 @@ func updateProduct(w http.ResponseWriter, r *http.Request) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := service.UpdateProduct(ctxTimeout, uProduct, int64(id)); err != nil {
+  uProduct.Id = int64(id)
+
+	if err := service.UpdateProduct(ctxTimeout, uProduct); err != nil {
 		http.Error(w, "Could not update this product", http.StatusInternalServerError)
 		return
 	}

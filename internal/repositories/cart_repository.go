@@ -52,10 +52,10 @@ func (r *RepositoryPostgres) GetCartItems(ctx context.Context) ([]models.CartIte
   return cartItems, nil
 } 
 
-func (r *RepositoryPostgres) UpdateCartItems(ctx context.Context, cartItem models.CartItem, id int64) error {
+func (r *RepositoryPostgres) UpdateCartItems(ctx context.Context, cartItem models.CartItem) error {
   _, err := r.Conn.Exec(
     ctx,
-    `UPDATE carts SET product_id = $2, product_type_id = $3, quantity = $4 WHERE id = $1;`, id, cartItem.ProductId, cartItem.ProductTypeId, cartItem.Quantity)
+    `UPDATE carts SET product_id = $2, product_type_id = $3, quantity = $4 WHERE id = $1;`, cartItem.Id, cartItem.ProductId, cartItem.ProductTypeId, cartItem.Quantity)
   
   if err != nil {
     return err

@@ -37,8 +37,8 @@ func (s Service) FindAllProducts(ctx context.Context) ([]models.Product, error) 
 	return products, nil
 }
 
-func (s Service) UpdateProduct(ctx context.Context, product models.Product, id int64) error {
-	err := s.Repository.UpdateProduct(ctx, product, id)
+func (s Service) UpdateProduct(ctx context.Context, product models.Product) error {
+	err := s.Repository.UpdateProduct(ctx, product)
 	if err != nil {
 		return err
 	}

@@ -77,7 +77,9 @@ func updateCartItems(w http.ResponseWriter, r *http.Request) {
   ctxTimeout, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
   defer cancel()
 
-  err = service.UpdateCartItems(ctxTimeout, cartItems, int64(id))
+  cartItems.Id = int64(id)
+
+  err = service.UpdateCartItems(ctxTimeout, cartItems)
   if err != nil {
     http.Error(w, "could not update this cart items", http.StatusInternalServerError)
     return

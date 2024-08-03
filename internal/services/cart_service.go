@@ -31,8 +31,8 @@ func (s Service) GetCartItems(ctx context.Context) ([]models.CartItem, error) {
   return cartItems, nil
 }
 
-func (s Service) UpdateCartItems(ctx context.Context, cartItem models.CartItem, id int64) error {
-  err := s.Repository.UpdateCartItems(ctx, cartItem, id)
+func (s Service) UpdateCartItems(ctx context.Context, cartItem models.CartItem) error {
+  err := s.Repository.UpdateCartItems(ctx, cartItem)
   if err != nil {
     return err
   }

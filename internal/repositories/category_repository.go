@@ -74,10 +74,10 @@ func (r *RepositoryPostgres) FindCategoryById(ctx context.Context, id int64) (mo
 	return category, nil
 }
 
-func (r *RepositoryPostgres) UpdateCategory(ctx context.Context, category models.Category, id int64) error {
+func (r *RepositoryPostgres) UpdateCategory(ctx context.Context, category models.Category) error {
 	_, err := r.Conn.Exec(
 		ctx,
-		`UPDATE categories SET name = $2, url = $3 WHERE id = $1`, id, category.Name, category.Url)
+		`UPDATE categories SET name = $2, url = $3 WHERE id = $1`, category.Id, category.Name, category.Url)
 	if err != nil {
 		return err
 	}
